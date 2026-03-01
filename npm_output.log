@@ -1,0 +1,101 @@
+
+> app@0.0.1 dev
+> vite dev
+
+4:13:39 AM [vite] (client) Forced re-optimization of dependencies
+
+  VITE v7.3.1  ready in 1574 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            username TEXT UNIQUE,
+            password_hash TEXT
+        );
+CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            user_id TEXT,
+            expires_at INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+CREATE TABLE IF NOT EXISTS notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            title TEXT,
+            content TEXT,
+            created_at INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE
+        );
+CREATE TABLE IF NOT EXISTS note_tags (
+            note_id INTEGER,
+            tag_id INTEGER,
+            PRIMARY KEY (note_id, tag_id),
+            FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE,
+            FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
+        );
+CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            title TEXT,
+            content TEXT,
+            is_done INTEGER DEFAULT 0,
+            created_at INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+INSERT INTO users (id, username, password_hash) VALUES ('d6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/, 'testuser123', '$2b$10$zbTIPWj4xnVGUMPowhOltuf7/'/*+28 bytes*/)
+SELECT id, username, password_hash FROM users WHERE username = 'testuser123'
+INSERT INTO sessions (id, user_id, expires_at) VALUES ('eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/, 'd6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/, 1772339356847.0)
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338456879.0
+
+
+        SELECT n.*, GROUP_CONCAT(t.name) as tags
+        FROM notes n
+        LEFT JOIN note_tags nt ON n.id = nt.note_id
+        LEFT JOIN tags t ON nt.tag_id = t.id
+        WHERE n.user_id = 'd6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/
+        GROUP BY n.id
+        ORDER BY n.created_at DESC
+
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338457072.0
+
+SELECT * FROM todos WHERE user_id = 'd6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/ ORDER BY created_at DESC
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338457167.0
+
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338457248.0
+
+INSERT INTO todos (user_id, title, content, is_done, created_at) VALUES ('d6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/, 'Buy groceries', 'Milk, eggs, bread', 0, 1772338457249.0)
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338457265.0
+
+SELECT * FROM todos WHERE id = 1.0 AND user_id = 'd6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/
+
+        SELECT u.id, u.username
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ'/*+439 bytes*/ AND s.expires_at > 1772338457471.0
+
+SELECT * FROM todos WHERE user_id = 'd6f855f8-3eea-49c6-854e-b21d2578'/*+4 bytes*/ ORDER BY created_at DESC
