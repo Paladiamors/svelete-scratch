@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 const db = new Database('sqlite.db', { verbose: console.log });
 
 export function initDb() {
-    const userTable = `
+	const userTable = `
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             username TEXT UNIQUE,
@@ -11,7 +11,7 @@ export function initDb() {
         );
     `;
 
-    const sessionTable = `
+	const sessionTable = `
         CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
             user_id TEXT,
@@ -20,7 +20,7 @@ export function initDb() {
         );
     `;
 
-    const noteTable = `
+	const noteTable = `
         CREATE TABLE IF NOT EXISTS notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id TEXT,
@@ -31,14 +31,14 @@ export function initDb() {
         );
     `;
 
-    const tagTable = `
+	const tagTable = `
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE
         );
     `;
 
-    const noteTagTable = `
+	const noteTagTable = `
         CREATE TABLE IF NOT EXISTS note_tags (
             note_id INTEGER,
             tag_id INTEGER,
@@ -48,11 +48,11 @@ export function initDb() {
         );
     `;
 
-    db.exec(userTable);
-    db.exec(sessionTable);
-    db.exec(noteTable);
-    db.exec(tagTable);
-    db.exec(noteTagTable);
+	db.exec(userTable);
+	db.exec(sessionTable);
+	db.exec(noteTable);
+	db.exec(tagTable);
+	db.exec(noteTagTable);
 }
 
 export default db;
