@@ -4,7 +4,7 @@ This document serves as the primary developer documentation and guide for AI cod
 
 ## Project Overview
 
-This is a note-taking application built with **SvelteKit** and **TypeScript**. It allows users to register, log in, manage sessions, create notes, add tags to notes, and view their notes.
+This is a note-taking and todo application built with **SvelteKit** and **TypeScript**. It allows users to register, log in, manage sessions, create notes, add tags to notes, view their notes, and manage their todos.
 
 ## Technology Stack
 
@@ -23,6 +23,7 @@ This is a note-taking application built with **SvelteKit** and **TypeScript**. I
     - `db.ts`: Database connection and schema definitions.
     - `auth.ts`: Authentication logic (sessions, login, etc.).
     - `notes.ts`: Logic for handling notes and tags.
+    - `todos.ts`: Logic for handling todos.
   - `routes/`: SvelteKit routes.
     - `/`: Home page displaying the user's notes.
     - `/login/`: User login page.
@@ -30,6 +31,9 @@ This is a note-taking application built with **SvelteKit** and **TypeScript**. I
     - `/logout/`: Endpoint for logging out.
     - `/notes/new/`: Page to create a new note.
     - `/notes/[id]/`: Page to view/edit a specific note.
+    - `/todos/`: Page displaying the user's todos.
+    - `/todos/new/`: Page to create a new todo.
+    - `/todos/[id]/`: Page to view/edit a specific todo.
   - `hooks.server.ts`: SvelteKit server hooks, primarily used for verifying the `session_id` cookie and populating `event.locals.user`.
 
 ## Database Schema
@@ -41,6 +45,7 @@ The SQLite database is initialized in `src/lib/server/db.ts` with the following 
 - **`notes`**: `id` (INTEGER PRIMARY KEY AUTOINCREMENT), `user_id` (TEXT FOREIGN KEY), `title` (TEXT), `content` (TEXT), `created_at` (INTEGER)
 - **`tags`**: `id` (INTEGER PRIMARY KEY AUTOINCREMENT), `name` (TEXT UNIQUE)
 - **`note_tags`**: `note_id` (INTEGER), `tag_id` (INTEGER), mapping table between notes and tags.
+- **`todos`**: `id` (INTEGER PRIMARY KEY AUTOINCREMENT), `user_id` (TEXT FOREIGN KEY), `title` (TEXT), `content` (TEXT), `is_done` (INTEGER), `created_at` (INTEGER)
 
 ## Important Instructions for AI Agents
 

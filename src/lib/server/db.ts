@@ -48,11 +48,24 @@ export function initDb() {
         );
     `;
 
+  const todoTable = `
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            title TEXT,
+            content TEXT,
+            is_done INTEGER DEFAULT 0,
+            created_at INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+    `;
+
   db.exec(userTable);
   db.exec(sessionTable);
   db.exec(noteTable);
   db.exec(tagTable);
   db.exec(noteTagTable);
+  db.exec(todoTable);
 }
 
 export default db;
