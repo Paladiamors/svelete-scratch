@@ -68,6 +68,24 @@
     margin: 1rem 0;
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+  }
+  .filters input,
+  .filters select,
+  .filters button {
+    margin: 0;
+  }
+  .filters input,
+  .filters select {
+    height: 40px;
+  }
+  .filters button {
+    height: 40px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
   }
   .todos-list ul {
     list-style-type: none;
