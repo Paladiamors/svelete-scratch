@@ -8,7 +8,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('session_id');
 
 	if (sessionId) {
-		const user = getSession(sessionId);
+		const user = await getSession(sessionId);
 		if (user) {
 			event.locals.user = { id: user.id, username: user.username };
 		} else {

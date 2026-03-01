@@ -18,13 +18,13 @@ export const actions = {
             return fail(400, { invalid: true });
         }
 
-        const sessionId = createSession(user.id);
+        const sessionId = await createSession(user.id);
         cookies.set('session_id', sessionId, {
             path: '/',
             httpOnly: true,
             sameSite: 'strict',
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 * 7 // 1 week
+            maxAge: 60 * 15 // 15 minutes
         });
 
         throw redirect(303, '/');

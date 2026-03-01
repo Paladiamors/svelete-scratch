@@ -1,8 +1,39 @@
 import db from './db';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import { generateKeyPair, exportJWK, SignJWT, jwtVerify, importJWK } from 'jose';
 
 const SALT_ROUNDS = 10;
+
+const JWKS_PATH = 'jwks.json';
+
+let cachedPrivateKey: any = null;
+let cachedPublicKey: any = null;
+
+async function getKeys() {
+    if (cachedPrivateKey && cachedPublicKey) {
+        return { privateKey: cachedPrivateKey, publicKey: cachedPublicKey };
+    }
+
+    let privateJwk, publicJwk;
+    if (fs.existsSync(JWKS_PATH)) {
+        const jwks = JSON.parse(fs.readFileSync(JWKS_PATH, 'utf8'));
+        privateJwk = jwks.private;
+        publicJwk = jwks.public;
+    } else {
+        const { publicKey, privateKey } = await generateKeyPair('RS256', { extractable: true });
+        privateJwk = await exportJWK(privateKey);
+        publicJwk = await exportJWK(publicKey);
+        privateJwk.alg = 'RS256';
+        publicJwk.alg = 'RS256';
+        fs.writeFileSync(JWKS_PATH, JSON.stringify({ private: privateJwk, public: publicJwk }, null, 2));
+    }
+    cachedPrivateKey = await importJWK(privateJwk, 'RS256');
+    cachedPublicKey = await importJWK(publicJwk, 'RS256');
+
+    return { privateKey: cachedPrivateKey, publicKey: cachedPublicKey };
+}
 
 export interface User {
     id: string;
@@ -32,16 +63,33 @@ export function verifyUser(username: string, password: string): User | null {
     return null;
 }
 
-export function createSession(userId: string): string {
-    const sessionId = uuidv4();
-    // Session expires in 7 days
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+export async function createSession(userId: string): Promise<string> {
+    const { privateKey } = await getKeys();
+
+    // Session expires in 15 mins
+    const expiresAtDate = new Date(Date.now() + 15 * 60 * 1000);
+    const expiresAt = expiresAtDate.getTime();
+
+    const sessionId = await new SignJWT({ sub: userId })
+        .setProtectedHeader({ alg: 'RS256' })
+        .setIssuedAt()
+        .setExpirationTime('15m')
+        .sign(privateKey);
+
     const stmt = db.prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)');
     stmt.run(sessionId, userId, expiresAt);
     return sessionId;
 }
 
-export function getSession(sessionId: string): User | null {
+export async function getSession(sessionId: string): Promise<User | null> {
+    const { publicKey } = await getKeys();
+
+    try {
+        await jwtVerify(sessionId, publicKey);
+    } catch (e) {
+        return null;
+    }
+
     const stmt = db.prepare(`
         SELECT u.id, u.username
         FROM sessions s
