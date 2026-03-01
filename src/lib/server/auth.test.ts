@@ -30,19 +30,19 @@ describe('Authentication Logic', () => {
         expect(user2).toBeNull();
     });
 
-    it('should create, retrieve, and delete sessions', () => {
+    it('should create, retrieve, and delete sessions', async () => {
         const username = 'session_test_' + Date.now();
         const user = createUser(username, 'pass')!;
 
-        const sessionId = createSession(user.id);
+        const sessionId = await createSession(user.id);
         expect(sessionId).toBeDefined();
 
-        const sessionUser = getSession(sessionId);
+        const sessionUser = await getSession(sessionId);
         expect(sessionUser).not.toBeNull();
         expect(sessionUser?.id).toBe(user.id);
 
         deleteSession(sessionId);
-        const deletedSessionUser = getSession(sessionId);
+        const deletedSessionUser = await getSession(sessionId);
         expect(deletedSessionUser).toBeNull();
     });
 });
