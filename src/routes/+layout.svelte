@@ -36,6 +36,9 @@
   .sidebar ul {
     list-style-type: none;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
   .sidebar li {
     margin-bottom: 0.5rem;
