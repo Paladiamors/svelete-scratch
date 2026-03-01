@@ -1,16 +1,16 @@
 import db from './db';
 
 interface Note {
-	id: number;
-	user_id: string;
-	title: string;
-	content: string;
-	created_at: number;
-	tags: string[];
+    id: number;
+    user_id: string;
+    title: string;
+    content: string;
+    created_at: number;
+    tags: string[];
 }
 
 export function getNotes(userId: string): Note[] {
-	const stmt = db.prepare(`
+    const stmt = db.prepare(`
         SELECT n.*, GROUP_CONCAT(t.name) as tags
         FROM notes n
         LEFT JOIN note_tags nt ON n.id = nt.note_id
@@ -20,15 +20,15 @@ export function getNotes(userId: string): Note[] {
         ORDER BY n.created_at DESC
     `);
 
-	const rows = stmt.all(userId) as any[];
-	return rows.map((row) => ({
-		...row,
-		tags: row.tags ? row.tags.split(',') : []
-	}));
+    const rows = stmt.all(userId) as any[];
+    return rows.map(row => ({
+        ...row,
+        tags: row.tags ? row.tags.split(',') : []
+    }));
 }
 
 export function getNote(id: number, userId: string): Note | null {
-	const stmt = db.prepare(`
+    const stmt = db.prepare(`
         SELECT n.id, n.user_id, n.title, n.content, n.created_at, GROUP_CONCAT(t.name) as tags
         FROM notes n
         LEFT JOIN note_tags nt ON n.id = nt.note_id
@@ -37,73 +37,65 @@ export function getNote(id: number, userId: string): Note | null {
         GROUP BY n.id
     `);
 
-	const row = stmt.get(id, userId) as any;
+    const row = stmt.get(id, userId) as any;
 
-	if (!row) return null;
+    if (!row) return null;
 
-	return {
-		...row,
-		tags: row.tags ? row.tags.split(',') : []
-	};
+    return {
+        ...row,
+        tags: row.tags ? row.tags.split(',') : []
+    };
 }
 
 export function createNote(userId: string, title: string, content: string, tags: string[]): number {
-	const createTransaction = db.transaction(() => {
-		const stmt = db.prepare(
-			'INSERT INTO notes (user_id, title, content, created_at) VALUES (?, ?, ?, ?)'
-		);
-		const info = stmt.run(userId, title, content, Date.now());
-		const noteId = info.lastInsertRowid as number;
+    const createTransaction = db.transaction(() => {
+        const stmt = db.prepare('INSERT INTO notes (user_id, title, content, created_at) VALUES (?, ?, ?, ?)');
+        const info = stmt.run(userId, title, content, Date.now());
+        const noteId = info.lastInsertRowid as number;
 
-		updateTags(noteId, tags);
+        updateTags(noteId, tags);
 
-		return noteId;
-	});
+        return noteId;
+    });
 
-	return createTransaction();
+    return createTransaction();
 }
 
-export function updateNote(
-	id: number,
-	userId: string,
-	title: string,
-	content: string,
-	tags: string[]
-): boolean {
-	const updateTransaction = db.transaction(() => {
-		const stmt = db.prepare('UPDATE notes SET title = ?, content = ? WHERE id = ? AND user_id = ?');
-		const info = stmt.run(title, content, id, userId);
+export function updateNote(id: number, userId: string, title: string, content: string, tags: string[]): boolean {
+    const updateTransaction = db.transaction(() => {
+        const stmt = db.prepare('UPDATE notes SET title = ?, content = ? WHERE id = ? AND user_id = ?');
+        const info = stmt.run(title, content, id, userId);
 
-		if (info.changes > 0) {
-			updateTags(id, tags);
-			return true;
-		}
-		return false;
-	});
+        if (info.changes > 0) {
+            updateTags(id, tags);
+            return true;
+        }
+        return false;
+    });
 
-	return updateTransaction();
+    return updateTransaction();
 }
 
 export function deleteNote(id: number, userId: string): boolean {
-	const stmt = db.prepare('DELETE FROM notes WHERE id = ? AND user_id = ?');
-	const info = stmt.run(id, userId);
-	return info.changes > 0;
+    const stmt = db.prepare('DELETE FROM notes WHERE id = ? AND user_id = ?');
+    const info = stmt.run(id, userId);
+    return info.changes > 0;
 }
 
 function updateTags(noteId: number, tags: string[]) {
-	// Clear existing tags for this note
-	db.prepare('DELETE FROM note_tags WHERE note_id = ?').run(noteId);
+    // Clear existing tags for this note
+    db.prepare('DELETE FROM note_tags WHERE note_id = ?').run(noteId);
 
-	const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
-	const getTagId = db.prepare('SELECT id FROM tags WHERE name = ?');
-	const linkTag = db.prepare('INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)');
+    const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
+    const getTagId = db.prepare('SELECT id FROM tags WHERE name = ?');
+    const linkTag = db.prepare('INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)');
 
-	for (const tag of tags) {
-		const trimmedTag = tag.trim();
-		if (trimmedTag) {
-			insertTag.run(trimmedTag);
-			const tagRecord = getTagId.get(trimmedTag) as { id: number };
-			linkTag.run(noteId, tagRecord.id);
-		}
-	}
+    for (const tag of tags) {
+        const trimmedTag = tag.trim();
+        if (trimmedTag) {
+            insertTag.run(trimmedTag);
+            const tagRecord = getTagId.get(trimmedTag) as { id: number };
+            linkTag.run(noteId, tagRecord.id);
+        }
+    }
 }
